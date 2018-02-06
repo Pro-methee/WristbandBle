@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/device_found_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+    <CheckBox
+        android:id="@+id/device_check_box"
+        android:text="Device name"
+        android:textSize="@dimen/medium_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start" />
+
+    <TextView
+        android:id="@+id/device_acceleration_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Acceleration : Not available"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginLeft="32dp" />
+
+    <TextView
+        android:id="@+id/device_rotation_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rotation : Not available"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginLeft="32dp" />
+</LinearLayout>

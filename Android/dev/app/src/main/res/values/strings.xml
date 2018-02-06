@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Cavyband Breakfirst</string>
+
+    <string name="error_ble_not_supported">BLE is not supported!</string>
+    <string name="error_bluetooth_not_supported">Bluetooth is not supported!</string>
+    <string name="error_bluetooth_not_enabled">Bluetooth is not enabled!</string>
+    <string name="error_location_permission_denied">Location permission has been denied!</string>
+    <string name="connected">Connected.</string>
+    <string name="disconnected">Disconnected.</string>
+
+    <string name="connected_title">Devices:</string>
+
+</resources>
