@@ -29,8 +29,8 @@ namespace BfSensorsCavyband
 
         protected override BleSensorCavybandBase FetchSensorForBleAddressNative(string a_bleAddress)
         {
-            AndroidJavaObject sensorObject = _javaObject.Call<AndroidJavaObject>("getSensorForAddress", a_bleAddress);
-            BleSensorCavybandAndroid cavyband = new BleSensorCavybandAndroid(a_bleAddress, sensorObject);
+            AndroidJavaObject sensorObject      = _javaObject.Call<AndroidJavaObject>("getSensorForAddress", a_bleAddress);
+            BleSensorCavybandAndroid cavyband   = new BleSensorCavybandAndroid(a_bleAddress, sensorObject);
             return cavyband;
         }
 

@@ -35,6 +35,8 @@ internal class DebugSensorManager : MonoBehaviour
     protected bool _speed = false;
 
     protected bool _isPaused = false;
+
+    protected bool _isNullRefExceptionRaised = false;
     #endregion
 
     void Awake()
@@ -52,24 +54,35 @@ internal class DebugSensorManager : MonoBehaviour
 
     void Update()
     {
+        if (_isNullRefExceptionRaised)
+            return;
 #if UNITY_EDITOR
-        npad1.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad1.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelX);
-        npad1.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad1.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelY);
-        npad1.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad1.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelZ);
-        npad1.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad1.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelMag);
+        try
+        {
+            npad1.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad1.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelX);
+            npad1.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad1.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelY);
+            npad1.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad1.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelZ);
+            npad1.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad1.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad1.AccelMag);
 
-        npad2.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad2.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelX);
-        npad2.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad2.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelY);
-        npad2.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad2.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelZ);
-        npad2.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
-        npad2.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelMag);
+            npad2.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad2.accelRendererX.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelX);
+            npad2.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad2.accelRendererY.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelY);
+            npad2.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad2.accelRendererZ.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelZ);
+            npad2.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().enabled = true;
+            npad2.accelRendererMag.GetComponent<MotionCurveDebugDataFiller>().SetDataSource(npad2.AccelMag);
+        }
+        catch(System.ArgumentNullException e)
+        {
+            Debug.LogWarning(e.Message);
+            _isNullRefExceptionRaised = true;
+        }
+
 #endif
     }
 

@@ -21,9 +21,9 @@ public class TimedFloatCurveRenderer : MonoBehaviour
     {
         get
         {
-            if (_lineRenderer.numPositions > 1)
+            if (_lineRenderer.positionCount > 1)
             {
-                Vector3 pos = _lineRenderer.GetPosition(_lineRenderer.numPositions - 1);
+                Vector3 pos = _lineRenderer.GetPosition(_lineRenderer.positionCount - 1);
                 return transform.position + pos;
             }
 
@@ -113,7 +113,7 @@ public class TimedFloatCurveRenderer : MonoBehaviour
 
         if (_lineRenderer != null)
         {
-            _lineRenderer.numPositions = positions.Length;
+            _lineRenderer.positionCount = positions.Length;
             _lineRenderer.SetPositions(positions);
         }
     }

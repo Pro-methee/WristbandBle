@@ -16,18 +16,21 @@ public class ToggleIndicator : MonoBehaviour {
         {
             ImageComponent = GetComponent<Image>();
         }
-	}
+
+    }
 	
     public void Toggle(bool isOn)
     {
         if (ImageComponent != null)
+        {
             ImageComponent.sprite = isOn ? BtnImages[1] : BtnImages[0];
+
+            if (isOn)
+                MenuController.DoRequest(ECategory.Vibration);
+        }    
         else
             Debug.LogWarning("ImageComponent is not referenced in ToggleIndicator !");
+
     }
 
-	// Update is called once per frame
-	void Update () {
-        //Toggle(IsOn);
-	}
 }

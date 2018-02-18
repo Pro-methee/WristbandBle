@@ -127,7 +127,6 @@ internal class SwitchPadCurveManager : MonoBehaviour
 
         if(_sensor != null)
             _sensor.onMotionDataReceived += OnMotionDataReceived;
-        //_sensor = BleS
 
         /*accelZX.Init(42f, yMaxAccel, yMaxWorldOffset);
         speedX.Init(42f, 0.5f, yMaxWorldOffset);

@@ -59,7 +59,7 @@ public class Curve : MonoBehaviour {
         // and to position the points properly from the start
         try
         {
-            _lineRenderer.numPositions = _numberOfValues;
+            _lineRenderer.positionCount = _numberOfValues;
             _baseLineValues            = new Vector3[_numberOfValues];
 
             for (int i = 0; i < _numberOfValues; i++)

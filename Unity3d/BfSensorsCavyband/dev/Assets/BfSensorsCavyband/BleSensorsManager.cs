@@ -6,7 +6,7 @@ namespace BfSensorsCavyband
 {
     public class BleSensorsManager
     {
-        public static bool ENABLE_LOG = false;
+        public static bool ENABLE_LOG = true;
         private static int LIBRARY_VERSION_CODE = 3;
 
         private static BleSensorsManagerBase S_INSTANCE;

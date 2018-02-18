@@ -9,6 +9,8 @@ namespace BfSensorsCavyband
     public delegate void BleSensorCavybandConnectionDelegate(BleSensorCavybandBase a_sensor, bool a_isConnected);
     public delegate void BleSensorCavybandButtonDelegate(BleSensorCavybandBase a_sensor, bool a_isDown);
     public delegate void BleSensorCavybandMotionDataDelegate(BleSensorCavybandBase a_sensor, Quaternion a_rot, Vector3 a_acc);
+    public delegate void BleSensorCavybandDataSyncDelegate(BleSensorCavybandBase a_sensor, Queue<byte[]> buffer);
+    public delegate void BleSensorCavybandSystemDelegate(BleSensorCavybandBase a_sensor, ECategory category, object info);
 
     public abstract class BleSensorCavybandBase
     {
@@ -20,7 +22,7 @@ namespace BfSensorsCavyband
             }
         }
 
-        public byte[] BigToLittleEndianShort(byte[] a_source, byte[] a_dest, int a_offset)
+        public static byte[] BigToLittleEndianShort(byte[] a_source, byte[] a_dest, int a_offset)
         {
             Array.Copy(a_source, a_offset, a_dest, 0, 2);
             Array.Reverse(a_dest);
@@ -29,7 +31,9 @@ namespace BfSensorsCavyband
 
         protected const string BUTTON_PRESSED_MESSAGE_HEADER = "D1";
         protected const string MOTION_DATA_MESSAGE_HEADER = "A1";
-        protected const string SYSTEM_MESSAGE_HEADER = "C1";
+        protected const string SYSTEM_MESSAGE_HEADER      = "C1";
+        protected const string TIME_DATA_HEADER           = "C3";
+        protected const string SYNC_DATA_HEADER           = "DA";
 
         protected static short BUTTON_EVENT_TYPE_PRESSED = 1;
         protected static short BUTTON_EVENT_TYPE_RELEASED = 0;
@@ -108,8 +112,25 @@ namespace BfSensorsCavyband
                 return _currentAcceleration;
             }
         }
-        #endregion
-        #endregion
+        #endregion Motion Data
+
+        #region Sync Data
+        protected Queue<byte> _tiltValues = new Queue<byte>();
+        //public Queue<byte> TiltValues {
+        //    get {
+        //        return _tiltValues;
+        //    }
+        //}
+
+        protected Queue<byte[]> _stepValues = new Queue<byte[]>();
+        //public Queue<byte> StepValues {
+        //    get {
+        //        return _stepValues;
+        //    }
+        //}
+        #endregion Sync Data
+
+        #endregion Properties
 
         public virtual void TearDown()
         {
@@ -120,10 +141,13 @@ namespace BfSensorsCavyband
         }
 
         #region Delegates
-        public BleSensorCavybandConnectionDelegate onConnectionStatusChanged;
-        public BleSensorCavybandButtonDelegate onButtonPressed;
+
+        public BleSensorCavybandConnectionDelegate  onConnectionStatusChanged;
+        public BleSensorCavybandButtonDelegate      onButtonPressed;
         //public BleSensorCavybandDelegate onButtonLongPressed;
-        public BleSensorCavybandMotionDataDelegate onMotionDataReceived;
+        public BleSensorCavybandMotionDataDelegate  onMotionDataReceived;
+        public BleSensorCavybandDataSyncDelegate    onSyncDataReceived;
+        public BleSensorCavybandSystemDelegate      onSystemInfoReceived;
         #endregion
 
         public BleSensorCavybandBase(string a_bleAddress)
@@ -143,8 +167,25 @@ namespace BfSensorsCavyband
         {
             SendCommandNative("?SYSTEM\n");
         }
+
+        public void QuerySystemTime()
+        {
+            SendCommandNative("?TIME\n");
+        }
+
+        public void SetupSystemTime(DateTime date)
+        {
+            int day = (int)(date.DayOfWeek);
+            int currentDayOfWeek     = day == 0 ? 7 : day;
+            int currentTimeInMinutes = date.Hour * 60 + date.Minute;
+
+            string SetupCmd = "%TIME=" + currentTimeInMinutes + "," + currentDayOfWeek + "\n";
+
+            SendCommandNative(SetupCmd);
+            
+        }
         #endregion
-        
+
         #region Game Mode
         public void EnterGameMode()
         {
@@ -154,7 +195,7 @@ namespace BfSensorsCavyband
         {
             _gameModeInterval = a_interval;
             _isInGameMode = true;
-            SendCommandNative("%OPR=3,4," + _gameModeInterval.ToString() + "\\n");
+            SendCommandNative("%OPR=3,4," + _gameModeInterval.ToString() + "\n");
             if (ENABLE_LOG)
                 Debug.Log("EnterGameMode : " + BleAddress);
         }
@@ -166,7 +207,72 @@ namespace BfSensorsCavyband
 
             if (ENABLE_LOG)
                 Debug.Log("ExitGameMode : " + BleAddress);
-            SendCommandNative("%OPR=3,0\\n");
+            SendCommandNative("%OPR=3,0\n");
+        }
+        #endregion
+
+        #region Vibration
+        /// <summary>
+        /// Request a Vibration in the wristband
+        /// </summary>
+        /// <param name="count">counter number ( support value< 99)</param>
+        /// <param name="intensity">10-99% of full power (0 = off)</param>
+        /// <param name="onPeriod">support value<999ms</param>
+        /// <param name="offPeriod">support value<2000ms</param>
+        public void Vibrate(uint count = 1, uint intensity = 99, uint onPeriod = 200, uint offPeriod = 500)
+        {
+            string[] args = new string[4];
+
+            args[0] = Math.Min(count, 99).ToString();
+
+            if (intensity > 9)
+                args[1] = Math.Min(intensity, 99).ToString();
+            else
+                args[1] = "0";
+
+            args[2] = Math.Min(onPeriod, 998).ToString();
+
+            args[3] = Math.Min(intensity, 1999).ToString();
+
+            SendCommandNative("%VIB=" + args[0] + "," + args[1] + "," + args[2] + "," + args[3] + "\n");
+        }
+        #endregion
+
+        #region Steps Mode
+        public void SetStepMode(bool isActivityRequired)
+        {
+            if(isActivityRequired)
+                SendCommandNative("%CFG=5,1\n");
+            else
+                SendCommandNative("%CFG=5,0\n");
+
+        }
+
+        public void GetStepModeResult()
+        {
+            SendCommandNative("%SYNC\n");
+        }
+
+
+        public void GetStepModeResult(int day, int time, bool isReversed = false)
+        {
+            day     = Mathf.Clamp(day, 0, 2);
+            time    = Mathf.Clamp(time, 0, 143);
+
+            string cmd = "%SYNC＝";
+            if (isReversed)
+            {
+                cmd += time.ToString() + "," + day.ToString() + "\\n";
+            }
+            else
+            {
+                cmd += day.ToString() + "," + time.ToString() + "\\n";
+            }
+            
+            TestScript.s_RawData = cmd + String.Format("(({0:d/M/yyyy HH:mm:ss})\n", StepsHandler.CurrentTimeSettings.Start);
+            Debug.Log(cmd);
+
+            SendCommandNative(cmd);
         }
         #endregion
 
@@ -220,6 +326,8 @@ namespace BfSensorsCavyband
         protected abstract void ParseMotionData(byte[] a_data);
         protected abstract void ParseButtonEventData(byte[] a_data);
         protected abstract void ParseSystemData(byte[] a_data);
+        protected abstract void ParseSystemTime(byte[] a_data);
+        protected abstract void ParseSyncData(byte[] a_data);
         #endregion
     }
 }

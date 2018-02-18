@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 
 namespace BfSensorsCavyband
@@ -8,7 +7,8 @@ namespace BfSensorsCavyband
     {
         void OnApplicationPause(bool a_isPaused)
         {
-            BleSensorsManager.Instance.NotifyApplicationPaused(a_isPaused);
+            if(BleSensorsManager.Instance != null)
+                BleSensorsManager.Instance.NotifyApplicationPaused(a_isPaused);
         }
 
         void OnDestroy()
