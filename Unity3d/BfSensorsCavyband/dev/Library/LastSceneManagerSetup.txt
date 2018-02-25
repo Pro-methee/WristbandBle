@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Curve/Curves.unity
+- path: Assets/BfWristband/Scenes/MainScene.unity
   isLoaded: 1
   isActive: 1
